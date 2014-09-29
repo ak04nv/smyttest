@@ -1,0 +1,60 @@
+{% load staticfiles %}
+{% load custom_filter %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
+    <title>Dashboard</title>
+  </head>
+  <body>
+   <div class="navbar navbar-default">
+     <a class="navbar-brand" href="{% url 'dashboard' %}">SmytTest</a>
+   </div>
+   <div class="container">
+    <div class="col-sm-2">
+      <ul class="nav nav-pills nav-stacked">
+      {% for model in models %}
+        <li{% if forloop.first %} class="active"{% endif %} id="link-{{ model }}"><a href="{% url 'view-items' model=model %}">{{ model }}</a></li>
+      {% endfor %}
+      </ul>
+    </div>
+    <div id="items" class="col-sm-10">
+      <table class="table">
+        <thead>
+          <tr>
+            {% for item in items.0 %}
+              <th data-name="{{ item.name }}" data-type="{{ item.type }}" data-editable="{{ item.editable }}" data-name="{{ item.name }}">{{ item.title }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in items|slice:"1:" %}
+            <tr data-update-url="{{ row.0 }}">
+              {% for value in row.1 %}
+                <td data-value="{{ value|my_date }}">{{ value|my_date }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% for m, f in forms.items %}
+        <form id="form-{{ m }}" action="{% url 'add-item' model=m %}" method="post" {% if not forloop.first%}hidden="hidden"{% endif %}>
+          {% csrf_token %}
+          <div class="col-sm-6">
+            <fieldset>
+              <legend>Новый объект</legend>
+              {{ f.as_p }}
+            </fieldset>
+            <button type="submit">Добавить</button>
+          </div>
+        </form>
+      {% endfor %}
+    </div>
+   </div>
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+   <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+   <script src="{% static 'utils.js' %}"></script>
+  </body>
+</html>
